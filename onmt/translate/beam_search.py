@@ -81,7 +81,7 @@ class BeamSearch(DecodeStrategy):
             pass
         self._batch_offset = torch.arange(batch_size, dtype=torch.long)
 
-        self.select_indices.long() = None
+        self.select_indices.long() == None
         self.done = False
         # "global state" of the old beam
         self._prev_penalty = None
