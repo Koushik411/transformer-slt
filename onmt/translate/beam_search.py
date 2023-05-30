@@ -81,7 +81,7 @@ class BeamSearch(DecodeStrategy):
             pass
         self._batch_offset = torch.arange(batch_size, dtype=torch.long)
 
-        self.select_indices = None
+        self.select_indices.long() = None
         self.done = False
         # "global state" of the old beam
         self._prev_penalty = None
@@ -140,7 +140,7 @@ class BeamSearch(DecodeStrategy):
     @property
     def current_backptr(self):
         # for testing
-        return self.select_indices.view(self.batch_size, self.beam_size)\
+        return self.select_indices.long().view(self.batch_size, self.beam_size)\
             .fmod(self.beam_size)
 
     @property
@@ -189,7 +189,7 @@ class BeamSearch(DecodeStrategy):
         # Resolve beam origin and map to batch index flat representation.
         self._batch_index = torch.div(self.topk_ids.long(), vocab_size)
         self._batch_index += self._beam_offset[:_B].unsqueeze(1)
-        self.select_indices = self._batch_index.view(_B * self.beam_size)
+        self.select_indices.long() = self._batch_index.view(_B * self.beam_size)
         self.topk_ids.fmod_(vocab_size)  # resolve true word ids
 
         # Append last prediction.
@@ -200,7 +200,7 @@ class BeamSearch(DecodeStrategy):
         self.maybe_update_forbidden_tokens()
 
         if self.return_attention or self._cov_pen:
-            current_attn = attn.index_select(1, self.select_indices)
+            current_attn = attn.index_select(1, self.select_indices.long())
             if step == 1:
                 self.alive_attn = current_attn
                 # update global state (step == 1)
@@ -209,12 +209,12 @@ class BeamSearch(DecodeStrategy):
                     self._coverage = current_attn
             else:
                 self.alive_attn = self.alive_attn.index_select(
-                    1, self.select_indices)
+                    1, self.select_indices.long())
                 self.alive_attn = torch.cat([self.alive_attn, current_attn], 0)
                 # update global state (step > 1)
                 if self._cov_pen:
                     self._coverage = self._coverage.index_select(
-                        1, self.select_indices)
+                        1, self.select_indices.long())
                     self._coverage += current_attn
                     self._prev_penalty = self.global_scorer.cov_penalty(
                         self._coverage, beta=self.global_scorer.beta).view(
@@ -295,7 +295,7 @@ class BeamSearch(DecodeStrategy):
         self.topk_log_probs = self.topk_log_probs.index_select(0,
                                                                non_finished)
         self._batch_index = self._batch_index.index_select(0, non_finished)
-        self.select_indices = self._batch_index.view(_B_new * self.beam_size)
+        self.select_indices.long() = self._batch_index.view(_B_new * self.beam_size)
         self.alive_seq = predictions.index_select(0, non_finished) \
             .view(-1, self.alive_seq.size(-1))
         self.topk_scores = self.topk_scores.index_select(0, non_finished)
