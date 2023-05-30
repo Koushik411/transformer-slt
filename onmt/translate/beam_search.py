@@ -194,7 +194,7 @@ class BeamSearch(DecodeStrategy):
 
         # Append last prediction.
         self.alive_seq = torch.cat(
-            [self.alive_seq.index_select(0, self.select_indices),
+            [self.alive_seq.index_select(0, self.select_indices.long()),
              self.topk_ids.view(_B * self.beam_size, 1)], -1)
 
         self.maybe_update_forbidden_tokens()
